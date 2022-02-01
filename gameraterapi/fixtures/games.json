@@ -1,0 +1,41 @@
+[
+    {
+        "model": "gameraterapi.game",
+        "pk": 1,
+        "fields": {
+            "title": "Civilization IV",
+            "description": "This is a really fun 4x strategy game for the computer",
+            "designer": "Sid Meier",
+            "year_released": 2018,
+            "num_of_players": 8,
+            "estimated_play_time": 8,
+            "age_recommendation": 12
+        }
+    },
+    {
+        "model": "gameraterapi.game",
+        "pk": 2,
+        "fields": {
+            "title": "Skyrim",
+            "description": "This is a really fun RPG game",
+            "designer": "Bethesda",
+            "year_released": 2012,
+            "num_of_players": 1,
+            "estimated_play_time": 100,
+            "age_recommendation": 15
+        }
+    },
+    {
+        "model": "gameraterapi.game",
+        "pk": 3,
+        "fields": {
+            "title": "Monopoly",
+            "description": "Classic board game",
+            "designer": "Hasbro",
+            "year_released": 1935,
+            "num_of_players": 7,
+            "estimated_play_time": 4,
+            "age_recommendation": 9
+        }
+    }
+]
