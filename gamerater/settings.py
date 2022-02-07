@@ -87,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'gameraterapi.wsgi.application'
+WSGI_APPLICATION = 'gamerater.wsgi.application'
 
 
 # Database
