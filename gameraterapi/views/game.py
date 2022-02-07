@@ -4,8 +4,8 @@ from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from gameraterapi.models import Game
-
+from gameraterapi.models import Game, Category
+from django.contrib.auth.models import User
 
 # STEPS TO 'GET' WITH REST FRAMEWORK:
 # 1. Use either the .get() or .all() ORM method. **.get() needs pk as arg**
@@ -32,6 +32,7 @@ from gameraterapi.models import Game
 # 2. Use .delete() method on the object.
 # 3. return an empty Response with a 204 status code **Response(None, status=status.HTTP_204_NO_CONTENT)**
 
+
 class GameView(ViewSet):
     def list(self, request):
         """Executes a GET request to the server to get all games"""
@@ -51,13 +52,29 @@ class GameView(ViewSet):
 
     def create(self, request):
         """Executes a POST request to the server to create a game"""
-        try:
-            serializer = CreateGameSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except ValidationError as ex:
-            return Response({'message': ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        category = Category.objects.get(pk=request.data['category'])
+        user = User.objects.get(pk=request.auth.user_id)
+
+        serializer = CreateGameSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        game = serializer.save(user=user)
+        game.categories.add(category)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # category = Category.objects.get(pk=request.data['category'])
+
+        # game = Game.objects.create(
+        #     title=request.data['title'],
+        #     description=request.data['description'],
+        #     designer=request.data['designer'],
+        #     year_released=request.data['year_released'],
+        #     num_of_players=request.data['num_of_players'],
+        #     estimated_play_time=request.data['estimated_play_time'],
+        #     age_recommendation=request.data['age_recommendation']
+        # )
+        # game.categories.add(category)
+        # serializer = CreateGameSerializer(game)
+        # return Response(serializer.data)
 
     def update(self, request, pk):
         """Executes a PUT request to the server to update a specific single game"""
@@ -87,18 +104,19 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = '__all__'
-        depth = 1
+        depth = 2
 
 
 # This serializer will include the fields that are expected from the client.
 # Notice it does not have the gamer in the fields. Since the gamer comes from
 # the Auth header it will not be in the request body
 
-#? The new serializer will be used to validate and save the new game in the create method
+# ? The new serializer will be used to validate and save the new game in the create method
 class CreateGameSerializer(serializers.ModelSerializer):
     """JSON serializer for games"""
     class Meta:
         model = Game
         fields = ('id', 'title', 'description',
                   'designer', 'year_released', 'num_of_players',
-                  'estimated_play_time', 'age_recommendation')
+                  'estimated_play_time', 'age_recommendation',
+                  'categories')
