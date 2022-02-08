@@ -1,11 +1,11 @@
+from django.contrib.auth.models import User
 from django.forms import ValidationError
 from django.http import HttpResponseServerError
+from gameraterapi.models import Category, Game
 from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from gameraterapi.models import Game, Category
-from django.contrib.auth.models import User
 
 # STEPS TO 'GET' WITH REST FRAMEWORK:
 # 1. Use either the .get() or .all() ORM method. **.get() needs pk as arg**
@@ -38,6 +38,9 @@ class GameView(ViewSet):
         """Executes a GET request to the server to get all games"""
         games = Game.objects.all()
 
+        for game in games:
+            game.uploaded = request.auth.user == game.user
+
         serializer = GameSerializer(games, many=True)
 
         return Response(serializer.data)
@@ -45,6 +48,7 @@ class GameView(ViewSet):
     def retrieve(self, request, pk):
         """Executes a GET request to the server to get a single game"""
         game = Game.objects.get(pk=pk)
+        game.uploaded = request.auth.user == game.user
 
         serializer = GameSerializer(game)
 
@@ -103,7 +107,10 @@ class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for games"""
     class Meta:
         model = Game
-        fields = '__all__'
+        fields = ('id', 'title', 'description', 'designer', 'year_released',
+                  'num_of_players', 'estimated_play_time',
+                  'age_recommendation', 'categories', 'user',
+                  'uploaded')
         depth = 2
 
 
