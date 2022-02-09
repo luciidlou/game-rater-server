@@ -31,8 +31,8 @@ class Game(models.Model):
         """Average rating calculated attribute for each game"""
         ratings = UserGameRating.objects.filter(game=self)
         total_rating = 0
-        for rating in ratings:
-            # Sum all of the ratings for the game
-            total_rating += rating.rating
-            # Calculate the average and return it.
-            # If you don't know how to calculate average, Google it.
+        if len(ratings) != 0:
+            for rating in ratings:
+                total_rating += rating.rating
+            average_rating = total_rating / len(ratings)
+            return average_rating
