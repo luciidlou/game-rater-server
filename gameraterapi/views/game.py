@@ -110,7 +110,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'description', 'designer', 'year_released',
                   'num_of_players', 'estimated_play_time',
                   'age_recommendation', 'categories', 'user',
-                  'uploaded')
+                  'uploaded', 'average_rating')
         depth = 2
 
 
