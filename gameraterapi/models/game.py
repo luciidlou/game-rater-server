@@ -35,4 +35,4 @@ class Game(models.Model):
             for rating in ratings:
                 total_rating += rating.rating
             average_rating = total_rating / len(ratings)
-            return average_rating
+        return average_rating
