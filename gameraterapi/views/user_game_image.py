@@ -1,11 +1,11 @@
 import base64
 import uuid
-from django.forms import ValidationError
-from django.http import HttpResponseServerError
+# from django.forms import ValidationError
+# from django.http import HttpResponseServerError
 from django.core.files.base import ContentFile
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework import serializers, status
-from rest_framework.decorators import action
+# from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from gameraterapi.models import UserGameImage, Game
@@ -16,6 +16,14 @@ class PostImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserGameImage
         fields = ('game', 'action_pic')
+
+
+class ListImageSerializer(serializers.ModelSerializer):
+    """JSON serializer for images"""
+    class Meta:
+        model = UserGameImage
+        fields = "__all__"
+        depth = 1
 
 
 class UserGameImageView(ViewSet):
@@ -44,3 +52,11 @@ class UserGameImageView(ViewSet):
         # serializer.is_valid(raise_exception=True)
         # serializer.save(user=request.auth.user, action_pic=data)
         # return Response(serializer.data)
+
+    def list(self, request):
+        """Handles GET requests on images"""
+        images = UserGameImage.objects.all()
+
+        serializer = ListImageSerializer(images, many=True)
+
+        return Response(serializer.data)

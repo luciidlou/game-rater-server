@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
-from django.forms import ValidationError
-from django.http import HttpResponseServerError
-from gameraterapi.models import Category, Game
+# from django.forms import ValidationError
+# from django.http import HttpResponseServerError
+from django.db.models import Q
 from rest_framework import serializers, status
-from rest_framework.decorators import action
+# from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from gameraterapi.models import Category, Game
 
 # STEPS TO 'GET' WITH REST FRAMEWORK:
 # 1. Use either the .get() or .all() ORM method. **.get() needs pk as arg**
@@ -36,7 +37,41 @@ from rest_framework.viewsets import ViewSet
 class GameView(ViewSet):
     def list(self, request):
         """Executes a GET request to the server to get all games"""
-        games = Game.objects.all()
+        search_text = self.request.query_params.get('q', None)
+        filter_games = self.request.query_params.get('orderby', None)
+
+        if search_text and filter_games:
+            [param, order] = filter_games.split("/")
+            if order == "desc":
+                games = Game.objects.filter(
+                    Q(title__contains=search_text) |
+                    Q(description__contains=search_text) |
+                    Q(designer__contains=search_text)
+                ).order_by(f'-{param}')
+            else:
+                games = Game.objects.filter(
+                    Q(title__contains=search_text) |
+                    Q(description__contains=search_text) |
+                    Q(designer__contains=search_text)
+                ).order_by(f'{param}')
+
+        elif search_text is not None:
+            games = Game.objects.filter(
+                Q(title__contains=search_text) |
+                Q(description__contains=search_text) |
+                Q(designer__contains=search_text)
+            )
+
+        elif filter_games is not None:
+            [param, order] = filter_games.split("/")
+
+            if order == "desc":
+                games = Game.objects.order_by(f'-{param}')
+            else:
+                games = Game.objects.order_by(f'{param}')
+
+        else:
+            games = Game.objects.all()
 
         for game in games:
             game.uploaded = request.auth.user == game.user
@@ -101,7 +136,7 @@ class GameView(ViewSet):
         game = Game.objects.get(pk=pk)
         game.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
-    
+
 
 class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for games"""
